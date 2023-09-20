@@ -1,0 +1,22 @@
+{
+  "name": "tdd",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "ex1": "npx ts-node ex1/client.ts",
+    "ex2": "npx ts-node ex2/client.ts",
+    "ex3": "npx ts-node ex3/client.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^5.2.2"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.1",
+    "vitest": "^0.34.4"
+  }
+}
