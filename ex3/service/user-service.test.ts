@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, test, vi } from "vitest";
 import { randomUUID } from "crypto";
 import { UserService } from "./user-service";
-import { IUser } from "../test/user-repository";
+import { IUser } from "../repository/user-repository";
 import { IBaseService } from "./interface/IBaseService";
 import { IBaseRepository } from "../repository/interface/IBaseReposiroty";
 
@@ -37,16 +37,14 @@ class UserRepositoryDuble extends IBaseRepository<IUser> {
       })
     );
   }
-  edit(user: IUser): Promise<IUser> {
+  edit(id: string, user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
   }
   getList(): Promise<IUser[]> {
     throw new Error("Method not implemented.");
   }
   delete(id: string): Promise<{ message: string }> {
-    return new Promise((resolve) =>
-      resolve({ message: `user with ${id} was removed` })
-    );
+    return new Promise((resolve) => resolve({ message: `entity removed` }));
   }
 }
 
@@ -105,7 +103,7 @@ describe("User service", () => {
 
   test("should delete an user", async () => {
     const result = await userService.delete(user.id);
-    expect(result).toEqual({ message: `user with ${user.id} was removed` });
+    expect(result).toEqual({ message: `entity removed` });
   });
   test("should throw an error when delete an user", async () => {
     vi.spyOn(UserRepositoryDuble.prototype, "delete").mockImplementationOnce(
@@ -126,7 +124,7 @@ describe("User service", () => {
       id: newUser.id,
       name: "René edited",
     };
-    const result = await userService.edit(editedUser);
+    const result = await userService.edit(newUser.id, editedUser);
     expect(result).toEqual(editedUser);
   });
   test("should throw an error when edit", async () => {
@@ -135,9 +133,12 @@ describe("User service", () => {
         throw new Error("error");
       }
     );
-    await expect(userService.edit(user)).rejects.toThrow();
+    await expect(userService.edit(user.id, user)).rejects.toThrow();
     expect(UserRepositoryDuble.prototype.edit).toHaveBeenCalled();
     expect(UserRepositoryDuble.prototype.edit).toHaveBeenCalledOnce();
-    expect(UserRepositoryDuble.prototype.edit).toHaveBeenCalledWith(user);
+    expect(UserRepositoryDuble.prototype.edit).toHaveBeenCalledWith(
+      user.id,
+      user
+    );
   });
 });

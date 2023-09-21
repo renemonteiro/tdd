@@ -6,8 +6,9 @@ import { IBaseController } from "./interfaces/IBaseController";
 export class UserController extends IBaseController<IUser> {
   constructor(
     protected service: IBaseService<IUser>,
-    protected validateParams: IValidate
+    protected bodyValidate: IValidate,
+    protected paramsValidate: IValidate
   ) {
-    super(service, validateParams);
+    super(service, bodyValidate, paramsValidate);
   }
 }

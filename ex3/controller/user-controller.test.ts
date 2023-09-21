@@ -4,13 +4,18 @@ import { IBaseController } from "./interfaces/IBaseController";
 import { IUser } from "../repository/user-repository";
 import { IBaseService } from "../service/interface/IBaseService";
 import { IBaseRepository } from "../repository/interface/IBaseReposiroty";
-import { UserController } from "./user-controller";
 import { IValidate } from "../utils/validate";
+import { UserController } from "./user-controller";
 
 let userService: IBaseService<IUser>;
 let userController: IBaseController<IUser>;
 
-class ValidateParams implements IValidate {
+class ParamsValidate implements IValidate {
+  validate() {
+    return true;
+  }
+}
+class BodyValidate implements IValidate {
   validate() {
     return true;
   }
@@ -24,7 +29,7 @@ class UserService extends IBaseService<IUser> {
   save(user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
   }
-  edit(user: IUser): Promise<IUser> {
+  edit(id: string, user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
   }
   getById(id: string): Promise<IUser | string> {
@@ -40,10 +45,15 @@ class UserService extends IBaseService<IUser> {
 }
 
 beforeAll(() => {
-  const validateParams = new ValidateParams();
+  const bodyValidate = new BodyValidate();
+  const paramsValidate = new ParamsValidate();
   const repo = new UserRepository();
   userService = new UserService(repo);
-  userController = new UserController(userService, validateParams);
+  userController = new UserController(
+    userService,
+    bodyValidate,
+    paramsValidate
+  );
 });
 
 describe("User Controller", () => {
@@ -62,11 +72,9 @@ describe("User Controller", () => {
   });
 
   test("should throw an error id missing params", async () => {
-    vi.spyOn(ValidateParams.prototype, "validate").mockImplementationOnce(
-      () => {
-        return false;
-      }
-    );
+    vi.spyOn(BodyValidate.prototype, "validate").mockImplementationOnce(() => {
+      return false;
+    });
     const req = {
       body: {
         name: "Rene",
@@ -78,11 +86,9 @@ describe("User Controller", () => {
   });
 
   test("should throw an error name missing params", async () => {
-    vi.spyOn(ValidateParams.prototype, "validate").mockImplementationOnce(
-      () => {
-        return false;
-      }
-    );
+    vi.spyOn(BodyValidate.prototype, "validate").mockImplementationOnce(() => {
+      return false;
+    });
     const id = randomUUID();
     const req = {
       body: {
@@ -95,27 +101,28 @@ describe("User Controller", () => {
   });
 
   test("should edit an user", async () => {
-    const user = await userController.save({
+    const reqSave = {
       body: { id: randomUUID(), name: "rene" },
-    });
+    };
+    const user = await userController.save(reqSave);
     expect(user.statusCode).toEqual(200);
-    const req = {
+
+    const reqEdit = {
       body: {
         id: user.body.id,
         name: user.body.name + " Edited",
       },
+      params: user.body.id,
     };
-    const userEdited = await userController.edit(req);
+    const userEdited = await userController.edit(reqEdit);
     expect(userEdited.statusCode).toEqual(200);
-    expect(userEdited.body).toEqual(req.body);
+    expect(userEdited.body).toEqual(reqEdit.body);
   });
 
   test("should throw an error id missing params edit", async () => {
-    vi.spyOn(ValidateParams.prototype, "validate").mockImplementationOnce(
-      () => {
-        return false;
-      }
-    );
+    vi.spyOn(BodyValidate.prototype, "validate").mockImplementationOnce(() => {
+      return false;
+    });
     const req = {
       body: {
         id: randomUUID(),
@@ -127,21 +134,26 @@ describe("User Controller", () => {
   });
 
   test("Should delete an user", async () => {
-    vi.spyOn(ValidateParams.prototype, "validate").mockImplementationOnce(
-      () => {
-        return false;
-      }
-    );
     const id = randomUUID();
     const request = {
-      params: id,
+      body: {
+        id,
+        name: "User to delete",
+      },
     };
-    const response = await userController.delete(request);
+    const user = await userController.save(request);
+    const requestDelete = { params: user.body.id };
+    const response = await userController.delete(requestDelete);
     expect(response.statusCode).toEqual(200);
     expect(response.body).toEqual({ message: "entity removed" });
   });
 
   test("Should throw an error id missing params delete", async () => {
+    vi.spyOn(ParamsValidate.prototype, "validate").mockImplementationOnce(
+      () => {
+        return false;
+      }
+    );
     const id = randomUUID();
     const request = {
       body: { id, name: "invalid params" },
@@ -156,7 +168,7 @@ describe("User Controller", () => {
       body: { id: randomUUID(), name: "Rene" },
     });
     const req = {
-      params: user.body.id,
+      params: { id: user.body.id },
     };
     const userFound = await userController.getById(req);
 

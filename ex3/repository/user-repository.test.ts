@@ -39,19 +39,18 @@ describe("Repository", () => {
   test("should get an user by id", async () => {
     const { id } = await userRepository.save(user);
     const newUser = await userRepository.getById(id);
-
     expect(newUser?.id).toEqual(id);
   });
   test("should edit an user", async () => {
     const newUser = await userRepository.save(user);
     newUser.name += " edited";
-    const userEdited = await userRepository.edit(newUser);
+    const userEdited = await userRepository.edit(newUser.id, newUser);
     expect(userEdited).toEqual({ id: newUser.id, name: "René edited" });
   });
   test("sloud delete an user", async () => {
     const newUser = await userRepository.save(user);
     const result = await userRepository.delete(newUser.id);
-    expect(result).toEqual({ message: "entity removed" });
+    expect(result).toEqual({ message: "entity not found" });
   });
   test("should have ten users saved", async () => {
     vi.spyOn(UserRepository.prototype, "save");

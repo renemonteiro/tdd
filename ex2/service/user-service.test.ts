@@ -42,9 +42,7 @@ class UserRepositoryDuble implements IUserRepository {
     throw new Error("Method not implemented.");
   }
   delete(id: string): Promise<{ message: string }> {
-    return new Promise((resolve) =>
-      resolve({ message: `user with ${id} was removed` })
-    );
+    return new Promise((resolve) => resolve({ message: `entity removed` }));
   }
 }
 
@@ -103,7 +101,7 @@ describe("User service", () => {
 
   test("should delete an user", async () => {
     const result = await userService.delete(user.id);
-    expect(result).toEqual({ message: `user with ${user.id} was removed` });
+    expect(result).toEqual({ message: `entity removed` });
   });
   test("should throw an error when delete an user", async () => {
     vi.spyOn(UserRepositoryDuble.prototype, "delete").mockImplementationOnce(

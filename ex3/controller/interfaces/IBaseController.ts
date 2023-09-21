@@ -1,10 +1,5 @@
-import {
-  fail,
-  httpBodyRequest,
-  httpResponse,
-  ok,
-  httpParamsRequest,
-} from "../../http-protocols/http";
+import {} from "../../decorator/fields";
+import { reject, httpResponse, resolve, http } from "../../http-protocols/http";
 import { IBaseService } from "../../service/interface/IBaseService";
 import { IValidate } from "../../utils/validate";
 export interface hasId {
@@ -13,63 +8,73 @@ export interface hasId {
 export abstract class IBaseController<T extends hasId> {
   constructor(
     protected baseService: IBaseService<T>,
-    protected validateParams: IValidate
+    protected bodyValidate: IValidate,
+    protected paramsValidate: IValidate
   ) {}
-  async save(httpRequest: httpBodyRequest<T>): Promise<httpResponse<T>> {
+
+  async save(httpRequest: http): Promise<httpResponse<T>> {
     try {
       const body = httpRequest.body;
-      const hasCorrectParams = this.validateParams.validate(httpRequest);
+      const hasCorrectParams = this.bodyValidate.validate(httpRequest);
       if (!hasCorrectParams) {
         throw new Error("missing arguments");
       }
 
       const response = await this.baseService.save(body);
-      return ok(response);
+      return resolve(response);
     } catch (error) {
-      return fail(error);
+      return reject(error);
     }
   }
-  async edit(httpRequest: httpBodyRequest<T>): Promise<httpResponse<T>> {
+  async edit(httpRequest: http): Promise<httpResponse<T>> {
     try {
-      const id = httpRequest.body;
-      if (!this.validateParams.validate(httpRequest)) {
+      const id = httpRequest.params;
+      if (!this.bodyValidate.validate(httpRequest)) {
         throw new Error("missing arguments");
       }
+      if (!this.paramsValidate.validate(httpRequest)) {
+        throw new Error("missing params");
+      }
 
-      const result = await this.baseService.edit(id);
-      return ok(result);
+      const result = await this.baseService.edit(id, httpRequest.body);
+      return resolve(result);
     } catch (error) {
-      return fail(error);
+      return reject(error);
     }
   }
 
   async getById(
-    httpRequest: httpParamsRequest
-  ): Promise<httpResponse<T | string>> {
+    httpRequest: http
+  ): Promise<httpResponse<T | { message: string }>> {
     try {
-      const id = httpRequest.params;
+      if (!this.paramsValidate.validate(httpRequest)) {
+        throw new Error("missing params");
+      }
+      const { id } = httpRequest.params;
       const entity = await this.baseService.getById(id);
       if (!entity) {
         throw new Error("entity not found");
       }
-      return ok(entity);
+      return resolve(entity);
     } catch (error) {
-      return fail(error);
+      return reject(error);
     }
   }
 
   async delete(
-    httpParamsRequest: httpParamsRequest
+    httpParamsRequest: http
   ): Promise<httpResponse<{ message: string }>> {
     try {
-      const id = httpParamsRequest.params;
-      if (this.validateParams.validate(httpParamsRequest)) {
+      const hasParams = this.paramsValidate.validate(httpParamsRequest);
+      if (!hasParams) {
         throw new Error("missing params");
       }
+      const { id } = httpParamsRequest.params;
+
       const result = await this.baseService.delete(id);
-      return ok(result);
+      return resolve(result);
     } catch (error) {
-      return fail(error);
+      return reject(error);
     }
   }
 }
