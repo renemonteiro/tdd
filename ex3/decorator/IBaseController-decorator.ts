@@ -36,7 +36,9 @@ export abstract class IBaseController<T extends hasId> {
   }
 
   @parmasValidationDecorator()
-  async getById(httpRequest: httpRequest): Promise<httpResponse<T | string>> {
+  async getById(
+    httpRequest: httpRequest
+  ): Promise<httpResponse<T | { message: string }>> {
     try {
       const id = httpRequest.params;
       const entity = await this.baseService.getById(id);
@@ -49,10 +51,10 @@ export abstract class IBaseController<T extends hasId> {
 
   @parmasValidationDecorator()
   async delete(
-    httpParamsRequest: httpRequest
+    httpRequest: httpRequest
   ): Promise<httpResponse<{ message: string }>> {
     try {
-      const id = httpParamsRequest.params;
+      const id = httpRequest.params;
 
       const result = await this.baseService.delete(id);
       return resolve(result);

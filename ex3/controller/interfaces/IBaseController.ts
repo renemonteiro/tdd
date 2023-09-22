@@ -1,5 +1,10 @@
 import {} from "../../decorator/fields";
-import { reject, httpResponse, resolve, http } from "../../http-protocols/http";
+import {
+  httpRequest,
+  httpResponse,
+  resolve,
+  reject,
+} from "../../http-protocols/http";
 import { IBaseService } from "../../service/interface/IBaseService";
 import { IValidate } from "../../utils/validate";
 export interface hasId {
@@ -12,7 +17,7 @@ export abstract class IBaseController<T extends hasId> {
     protected paramsValidate: IValidate
   ) {}
 
-  async save(httpRequest: http): Promise<httpResponse<T>> {
+  async save(httpRequest: httpRequest): Promise<httpResponse<T>> {
     try {
       const body = httpRequest.body;
       const hasCorrectParams = this.bodyValidate.validate(httpRequest);
@@ -26,7 +31,7 @@ export abstract class IBaseController<T extends hasId> {
       return reject(error);
     }
   }
-  async edit(httpRequest: http): Promise<httpResponse<T>> {
+  async edit(httpRequest: httpRequest): Promise<httpResponse<T>> {
     try {
       const id = httpRequest.params;
       if (!this.bodyValidate.validate(httpRequest)) {
@@ -44,7 +49,7 @@ export abstract class IBaseController<T extends hasId> {
   }
 
   async getById(
-    httpRequest: http
+    httpRequest: httpRequest
   ): Promise<httpResponse<T | { message: string }>> {
     try {
       if (!this.paramsValidate.validate(httpRequest)) {
@@ -62,14 +67,14 @@ export abstract class IBaseController<T extends hasId> {
   }
 
   async delete(
-    httpParamsRequest: http
+    httpRequest: httpRequest
   ): Promise<httpResponse<{ message: string }>> {
     try {
-      const hasParams = this.paramsValidate.validate(httpParamsRequest);
+      const hasParams = this.paramsValidate.validate(httpRequest);
       if (!hasParams) {
         throw new Error("missing params");
       }
-      const { id } = httpParamsRequest.params;
+      const { id } = httpRequest.params;
 
       const result = await this.baseService.delete(id);
       return resolve(result);

@@ -7,7 +7,7 @@ import {
   ValidateComposite,
 } from "./utils/validate";
 import { UserController } from "./controller/user-controller";
-import { http } from "./http-protocols/http";
+import { httpRequest } from "./http-protocols/http";
 
 const IdValidate = new FieldsValidation("id");
 const nameValidate = new FieldsValidation("name");
@@ -23,22 +23,22 @@ const userController = new UserController(userService, compositeParams, params);
 class Client {
   private readonly id = randomUUID;
 
-  async save(req: http) {
+  async save(req: httpRequest) {
     const result = await userController.save(req);
     console.log("save", result);
     return this;
   }
-  async edit(req: http) {
+  async edit(req: httpRequest) {
     const result = await userController.edit(req);
     console.log("edit", result);
     return this;
   }
-  async getById(req: http) {
+  async getById(req: httpRequest) {
     const result = await userController.getById(req);
     console.log("getById", result);
     return this;
   }
-  async delete(req: http) {
+  async delete(req: httpRequest) {
     const result = await userController.delete(req);
     console.log("delete", result);
     return this;

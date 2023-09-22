@@ -1,15 +1,8 @@
-export type httpParamsRequest = {
-  params: string;
-};
-export type httpBodyRequest<T> = {
-  body: T;
-};
-export type http = {
+export type httpRequest = {
   body?: any;
   params?: any;
   query?: any;
 };
-export type httpRequest<T> = httpParamsRequest & httpBodyRequest<T>;
 
 export type httpResponse<T> = {
   statusCode: number;
