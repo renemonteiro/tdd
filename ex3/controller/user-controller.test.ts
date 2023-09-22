@@ -32,7 +32,7 @@ class UserService extends IBaseService<IUser> {
   edit(id: string, user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
   }
-  getById(id: string): Promise<IUser | string> {
+  getById(id: string): Promise<IUser | { message: string }> {
     const user = {
       id,
       name: "Rene",
@@ -179,11 +179,11 @@ describe("User Controller", () => {
   test("Should throw an error to get an user by id", async () => {
     const invalidId = randomUUID();
     vi.spyOn(UserService.prototype, "getById").mockReturnValue(
-      new Promise((resolve) => resolve("entity not found"))
+      new Promise((resolve) => resolve({ message: "entity not found" }))
     );
 
     const user = await userController.getById({ params: invalidId });
 
-    expect(user.body).toEqual("entity not found");
+    expect(user.body).toEqual({ message: "entity not found" });
   });
 });

@@ -21,6 +21,11 @@ export abstract class IBaseService<T extends hasId> implements IService<T> {
 
   async getById(id: string): Promise<T | { message: string }> {
     const entity = await this.baseRepository.getById(id);
+    if (!entity) {
+      return {
+        message: "entity not found",
+      };
+    }
 
     return entity;
   }
