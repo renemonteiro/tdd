@@ -1,4 +1,6 @@
 import pytest
+
+
 class Email_Validator:
     def is_valid_email(self, email: str) -> bool:
         return True
