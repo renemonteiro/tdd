@@ -12,7 +12,7 @@ class User_Service:
     def get_user_by_id(self, id):
         user = self.repository.get_user_by_id(id)
 
-        if hasattr(user, "message"):
+        if not "id" in user and not "name" in user and not "email" in  user:
             raise ValueError("user not found")
             
         return user
