@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "vitest",
-    "ex1": "npx ts-node ex1/client.ts",
-    "ex2": "npx ts-node ex2/client.ts",
-    "ex3": "npx ts-node ex3/client.ts"
+    "start": "npx ts-node ex3/client.ts"
   },
   "keywords": [],
   "author": "",
