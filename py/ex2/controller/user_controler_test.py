@@ -32,6 +32,18 @@ class User_Service:
     
 
 
+def test_create_an_user_called(mocker):
+    user_service = User_Service()
+    user_controller = User_Controller(user_service)
+
+    spy = mocker.spy(user_service, "add")
+
+    user = before_all_user
+
+    user_controller.add(user)
+
+    spy.assert_called_once_with(user)
+
 def test_create_an_user(before_each):
     user_controller = before_each
 
