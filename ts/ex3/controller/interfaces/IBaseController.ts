@@ -47,6 +47,14 @@ export abstract class IBaseController<T extends hasId> {
       return reject(error);
     }
   }
+  async getAll(): Promise<httpResponse<T[]>> {
+    try {
+      const users = await this.baseService.getAll();
+      return resolve(users);
+    } catch (error) {
+      return reject(error);
+    }
+  }
 
   async getById(
     httpRequest: httpRequest

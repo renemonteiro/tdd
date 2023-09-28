@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeAll, vi } from "vitest";
+import { describe, expect, test, beforeAll, vi, beforeEach } from "vitest";
 import { randomUUID } from "crypto";
 import { IBaseController } from "./interfaces/IBaseController";
 import { IUser } from "../repository/user-repository";
@@ -6,6 +6,7 @@ import { IBaseService } from "../service/interface/IBaseService";
 import { IBaseRepository } from "../repository/interface/IBaseReposiroty";
 import { IValidate } from "../utils/validate";
 import { UserController } from "./user-controller";
+import { httpResponse } from "../http-protocols/http";
 
 let userService: IBaseService<IUser>;
 let userController: IBaseController<IUser>;
@@ -31,6 +32,14 @@ class UserService extends IBaseService<IUser> {
   }
   edit(id: string, user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
+  }
+  getAll(): Promise<IUser[]> {
+    return new Promise((resolve) =>
+      resolve([
+        { id: "1", name: "René" },
+        { id: "2", name: "René" },
+      ])
+    );
   }
   getById(id: string): Promise<IUser | { message: string }> {
     const user = {
@@ -185,5 +194,18 @@ describe("User Controller", () => {
     const user = await userController.getById({ params: invalidId });
 
     expect(user.body).toEqual({ message: "entity not found" });
+  });
+
+  test("Should return all users", async () => {
+    const response: httpResponse<IUser[]> = await userController.getAll();
+
+    const target: httpResponse<IUser[]> = {
+      body: [
+        { id: "1", name: "René" },
+        { id: "2", name: "René" },
+      ],
+      statusCode: 200,
+    };
+    expect(response).toEqual(target);
   });
 });
