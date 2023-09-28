@@ -30,6 +30,17 @@ export abstract class IBaseService<T extends hasId> implements IService<T> {
     return entity;
   }
 
+  async getAll(): Promise<T[]> {
+    return await this.baseRepository.getAll();
+  }
+
+  async getPaginated(
+    page: number,
+    itemsPerPage: number
+  ): Promise<{ total: number; items: T[] }> {
+    return await this.baseRepository.getPaginated(page, itemsPerPage);
+  }
+
   async delete(id: string): Promise<{ message: string }> {
     const result = await this.baseRepository.delete(id);
     if (!result) {

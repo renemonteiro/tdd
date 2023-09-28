@@ -62,4 +62,50 @@ describe("Repository", () => {
     expect(list.length).toEqual(10);
     expect(UserRepository.prototype.save).toHaveBeenCalledTimes(10);
   });
+
+  test("Should return all users", async () => {
+    for (let x = 0; x < 10; x++) {
+      await userRepository.save({ id: x.toString(), name: "Rene" + x });
+    }
+    const users = await userRepository.getAll();
+    expect(users).length(10);
+  });
+
+  test("should return users paginated", async () => {
+    const total = 10;
+    const page = 1;
+    const userPerPage = 10;
+    const target = [];
+    for (let x = 0; x < total; x++) {
+      let user = await userRepository.save({
+        id: x.toString(),
+        name: "Rene" + x,
+      });
+      target.push(user);
+    }
+    const users = await userRepository.getPaginated(page, userPerPage);
+    expect(users).toEqual({
+      total: total,
+      items: target,
+    });
+  });
+  test("should return users paginated", async () => {
+    const total = 20;
+    const page = 2;
+    const userPerPage = 10;
+    const target = [];
+    for (let x = 0; x < total; x++) {
+      let user = await userRepository.save({
+        id: x.toString(),
+        name: "Rene" + x,
+      });
+      target.push(user);
+    }
+    const items = target.slice(10);
+    const users = await userRepository.getPaginated(page, userPerPage);
+    expect(users).toEqual({
+      total,
+      items,
+    });
+  });
 });

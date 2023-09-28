@@ -29,7 +29,7 @@ class UserRepositoryDuble extends IBaseRepository<IUser> {
   save(user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
   }
-  getById(id: string): Promise<IUser | undefined> {
+  getById(id: string): Promise<IUser | { message: string }> {
     return new Promise((resolve) =>
       resolve({
         id,
@@ -37,8 +37,24 @@ class UserRepositoryDuble extends IBaseRepository<IUser> {
       })
     );
   }
+  async getAll(): Promise<IUser[]> {
+    const users: IUser[] = [
+      { id: "1", name: "Rene" },
+      { id: "2", name: "Rene" },
+      { id: "3", name: "Rene" },
+    ];
+    return users;
+  }
   edit(id: string, user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
+  }
+  getPaginated(
+    page: number,
+    itemsPerPage: number
+  ): Promise<{ total: number; items: IUser[] }> {
+    return new Promise((resolve) =>
+      resolve({ total: 1, items: [{ id: "1", name: "Rene" }] })
+    );
   }
   getList(): Promise<IUser[]> {
     throw new Error("Method not implemented.");
@@ -140,5 +156,19 @@ describe("User service", () => {
       user.id,
       user
     );
+  });
+
+  test("Should return users", async () => {
+    const users = await userService.getAll();
+    expect(users).toEqual([
+      { id: "1", name: "Rene" },
+      { id: "2", name: "Rene" },
+      { id: "3", name: "Rene" },
+    ]);
+  });
+
+  test("Should return users paginated", async () => {
+    const result = await userService.getPaginated(1, 10);
+    expect(result).toEqual({ total: 1, items: [{ id: "1", name: "Rene" }] });
   });
 });

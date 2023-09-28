@@ -1,4 +1,4 @@
-import { describe, expect, test, beforeAll, vi } from "vitest";
+import { describe, expect, test, beforeAll, vi, beforeEach } from "vitest";
 import { randomUUID } from "crypto";
 import { IBaseController } from "./interfaces/IBaseController";
 import { IUser } from "../repository/user-repository";
@@ -6,6 +6,7 @@ import { IBaseService } from "../service/interface/IBaseService";
 import { IBaseRepository } from "../repository/interface/IBaseReposiroty";
 import { IValidate } from "../utils/validate";
 import { UserController } from "./user-controller";
+import { httpRequest, httpResponse } from "../http-protocols/http";
 
 let userService: IBaseService<IUser>;
 let userController: IBaseController<IUser>;
@@ -31,6 +32,22 @@ class UserService extends IBaseService<IUser> {
   }
   edit(id: string, user: IUser): Promise<IUser> {
     return new Promise((resolve) => resolve(user));
+  }
+  getPaginated(
+    page: number,
+    itemsPerPage: number
+  ): Promise<{ total: number; items: IUser[] }> {
+    return new Promise((resolve) =>
+      resolve({ total: 1, items: [{ id: "1", name: "Rene" }] })
+    );
+  }
+  getAll(): Promise<IUser[]> {
+    return new Promise((resolve) =>
+      resolve([
+        { id: "1", name: "René" },
+        { id: "2", name: "René" },
+      ])
+    );
   }
   getById(id: string): Promise<IUser | { message: string }> {
     const user = {
@@ -185,5 +202,34 @@ describe("User Controller", () => {
     const user = await userController.getById({ params: invalidId });
 
     expect(user.body).toEqual({ message: "entity not found" });
+  });
+
+  test("Should return all users", async () => {
+    const response: httpResponse<IUser[]> = await userController.getAll();
+
+    const target: httpResponse<IUser[]> = {
+      body: [
+        { id: "1", name: "René" },
+        { id: "2", name: "René" },
+      ],
+      statusCode: 200,
+    };
+    expect(response).toEqual(target);
+  });
+
+  test("Should return users paginated", async () => {
+    const request: httpRequest = {
+      params: { page: 1, itemsPerPage: 10 },
+    };
+    const response = await userController.getPaginated(request);
+
+    const target: httpResponse<{ total: number; items: IUser[] }> = {
+      statusCode: 200,
+      body: {
+        total: 1,
+        items: [{ id: "1", name: "Rene" }],
+      },
+    };
+    expect(response).toEqual(target);
   });
 });

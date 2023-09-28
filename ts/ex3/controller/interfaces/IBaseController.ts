@@ -47,7 +47,26 @@ export abstract class IBaseController<T extends hasId> {
       return reject(error);
     }
   }
+  async getAll(): Promise<httpResponse<T[]>> {
+    try {
+      const users = await this.baseService.getAll();
+      return resolve(users);
+    } catch (error) {
+      return reject(error);
+    }
+  }
 
+  async getPaginated(
+    httpRequest: httpRequest
+  ): Promise<httpResponse<{ total: number; items: T[] }>> {
+    try {
+      const { page, itemsPerPage } = httpRequest.params;
+      const result = await this.baseService.getPaginated(page, itemsPerPage);
+      return resolve(result);
+    } catch (error) {
+      return reject(error);
+    }
+  }
   async getById(
     httpRequest: httpRequest
   ): Promise<httpResponse<T | { message: string }>> {
